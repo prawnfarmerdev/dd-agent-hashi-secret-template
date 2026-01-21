@@ -1,0 +1,23 @@
+# Datadog API key retrieved from Vault using secret backend
+api_key: ENC[secret/datadog#api_key]
+
+# Update to your Datadog site (datadoghq.com, us5.datadoghq.com, datadoghq.eu, etc.)
+site: us5.datadoghq.com
+
+hostname: dd-agent-hashi-secret
+
+secret_backend_command: /scripts/secret_backend.py
+secret_backend_timeout: 5
+secret_backend_output_max_size: 1024
+
+# Logging
+log_level: INFO
+
+# Enable checks
+process_agent_enabled: true
+trace_agent_enabled: true
+
+# Listen on all interfaces
+bind_host: 0.0.0.0
+
+# Additional configs can be placed in conf.d/

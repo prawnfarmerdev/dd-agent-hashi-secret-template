@@ -1,0 +1,15 @@
+# HTTP check configuration with Vault secrets
+# Update the 'url' field to point to your actual service
+# Credentials are retrieved from HashiCorp Vault using ENC[secret/http_check#username] format
+instances:
+  - name: Secure Service Health Check
+    url: http://test-server:8080  # Update this to your actual service URL
+    timeout: 10
+    username: ENC[secret/http_check#username]
+    password: ENC[secret/http_check#password]
+    disable_ssl_validation: false
+    headers:
+      User-Agent: Datadog Agent/1.0
+    tags:
+      - env:demo
+      - service:example

@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  vault:
+    image: vault:latest
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "http://localhost:8200"
+    volumes:
+      - ./vault-setup.hcl:/vault/config/vault-setup.hcl
+    command: server -dev -config=/vault/config/vault-setup.hcl
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/v1/sys/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - dd-vault-net
+
+  datadog-agent:
+    build: .
+    container_name: datadog-agent
+    ports:
+      - "8125:8125/udp"  # DogStatsD
+      - "8126:8126"       # Trace Agent
+    environment:
+      - VAULT_DD_API_KEY=${VAULT_DD_API_KEY:-<REPLACE_WITH_REAL_DATADOG_API_KEY>}
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN=root
+      - DD_SITE=datadoghq.com
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    depends_on:
+      vault:
+        condition: service_healthy
+    networks:
+      - dd-vault-net
+
+networks:
+  dd-vault-net:
+    driver: bridge
