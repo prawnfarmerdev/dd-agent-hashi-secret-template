@@ -3,25 +3,41 @@ set -e
 
 echo "🧹 Starting cleanup process..."
 
+# Detect container runtime
+if command -v podman >/dev/null 2>&1; then
+    RUNTIME="podman"
+    COMPOSE_CMD="podman compose --in-pod false"
+elif command -v docker >/dev/null 2>&1; then
+    RUNTIME="docker"
+    COMPOSE_CMD="docker-compose"
+else
+    echo "❌ No container runtime found (podman or docker)"
+    exit 1
+fi
+
+echo "Using $RUNTIME runtime"
+
 # Stop and remove containers from docker-compose
 echo "Stopping and removing compose containers..."
-podman compose --in-pod false down 2>/dev/null || true
+$COMPOSE_CMD down 2>/dev/null || true
 
 # Force remove all containers
 echo "Force removing all containers..."
-podman rm -af 2>/dev/null || true
+$RUNTIME rm -af 2>/dev/null || true
 
-# Remove all networks (except default podman network)
+# Remove all networks (except default network)
 echo "Pruning networks..."
-podman network prune -f 2>/dev/null || true
+$RUNTIME network prune -f 2>/dev/null || true
 
-# Remove all pods if any exist
-echo "Removing pods..."
-podman pod rm -af 2>/dev/null || true
+# Remove all pods if any exist (podman only)
+if [ "$RUNTIME" = "podman" ]; then
+    echo "Removing pods..."
+    podman pod rm -af 2>/dev/null || true
+fi
 
 # Remove volumes (if any)
 echo "Pruning volumes..."
-podman volume prune -f 2>/dev/null || true
+$RUNTIME volume prune -f 2>/dev/null || true
 
 # Clean up temporary files
 echo "Cleaning temporary files..."

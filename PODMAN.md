@@ -4,6 +4,7 @@ This template works with Podman Compose with a few modifications.
 
 ## Prerequisites
 
+### Podman (Recommended)
 Install podman and podman-compose:
 
 ```bash
@@ -14,6 +15,17 @@ sudo pacman -S podman podman-compose
 pip install --user --break-system-packages podman-compose
 export PATH=$PATH:~/.local/bin
 ```
+
+### Docker (Fallback)
+The template also supports Docker Compose as a fallback. Install Docker and docker-compose:
+
+```bash
+# Follow Docker installation instructions for your distribution
+# Then install docker-compose
+sudo pip install docker-compose
+```
+
+The scripts will automatically detect and use the available compose tool.
 
 ## Changes Made for Podman Compatibility
 

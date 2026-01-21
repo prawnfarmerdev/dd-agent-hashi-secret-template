@@ -1,6 +1,38 @@
 #!/bin/sh
 set -e
 
+# Function to retry a command with exponential backoff
+# Usage: retry_command <max_attempts> <initial_wait> <max_wait> <command>
+retry_command() {
+    local max_attempts=$1
+    local wait_seconds=$2
+    local max_wait=$3
+    shift 3
+    local attempt=1
+    local command=("$@")
+    
+    while [ $attempt -le $max_attempts ]; do
+        if "${command[@]}" > /dev/null 2>&1; then
+            return 0
+        fi
+        
+        if [ $attempt -eq $max_attempts ]; then
+            echo "Command failed after $max_attempts attempts: ${command[*]}"
+            return 1
+        fi
+        
+        echo "Attempt $attempt/$max_attempts failed, waiting ${wait_seconds}s..."
+        sleep $wait_seconds
+        
+        # Exponential backoff with max limit
+        wait_seconds=$((wait_seconds * 2))
+        if [ $wait_seconds -gt $max_wait ]; then
+            wait_seconds=$max_wait
+        fi
+        attempt=$((attempt + 1))
+    done
+}
+
 # Wait for Vault to be ready with exponential backoff
 echo "Waiting for Vault to be ready..."
 max_attempts=30
@@ -30,22 +62,22 @@ while [ $attempt -le $max_attempts ]; do
     attempt=$((attempt + 1))
 done
 
-# Initialize KV v2 secrets engine
+# Initialize KV v2 secrets engine with retry
 echo "Initializing KV v2 secrets engine..."
-if curl -s -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
+if retry_command 5 1 5 curl -s -f -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
    -d '{"type":"kv-v2"}' \
-   http://vault:8200/v1/sys/mounts/secret > /dev/null 2>&1; then
+   http://vault:8200/v1/sys/mounts/secret; then
     echo "✅ KV v2 secrets engine initialized"
 else
     echo "⚠️  KV v2 secrets engine may already exist or initialization failed"
 fi
 
-# Write Datadog API key secret
+# Write Datadog API key secret with retry
 if [ -n "${VAULT_DD_API_KEY}" ]; then
     echo "Writing Datadog API key to Vault..."
-    if curl -s -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
+    if retry_command 5 1 5 curl -s -f -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
        -d "{\"data\":{\"api_key\":\"${VAULT_DD_API_KEY}\"}}" \
-       http://vault:8200/v1/secret/data/datadog > /dev/null 2>&1; then
+       http://vault:8200/v1/secret/data/datadog; then
         echo "✅ Datadog API key written to secret/datadog#api_key"
     else
         echo "⚠️  Datadog API key may already exist or write failed"
@@ -54,11 +86,11 @@ else
     echo "⚠️  VAULT_DD_API_KEY not set, using placeholder from .env"
 fi
 
-# Write HTTP check credentials
+# Write HTTP check credentials with retry
 echo "Writing HTTP check credentials to Vault..."
-if curl -s -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
+if retry_command 5 1 5 curl -s -f -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
    -d '{"data":{"username":"testuser","password":"testpass"}}' \
-   http://vault:8200/v1/secret/data/http_check > /dev/null 2>&1; then
+   http://vault:8200/v1/secret/data/http_check; then
     echo "✅ HTTP check credentials written to secret/http_check"
 else
     echo "⚠️  HTTP check credentials may already exist or write failed"

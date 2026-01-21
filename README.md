@@ -6,6 +6,13 @@ A minimal implementation of Datadog Agent with HashiCorp Vault secret management
 
 ### Using Helper Scripts (Recommended)
 
+For a unified interface, use the master manager script:
+```bash
+./manage.sh all   # Clean, init, deploy, and test in sequence
+```
+
+Or use individual commands:
+
 1. **Initialize environment:**
    ```bash
    ./init.sh
@@ -63,6 +70,7 @@ This template is designed to survive `podman system reset` operations. Key resil
 - `init.sh` - Environment validation and setup
 - `deploy.sh` - Automated deployment with health checks
 - `test-deployment.sh` - Comprehensive deployment verification
+- `manage.sh` - Unified manager for all operations (clean, init, deploy, test, status, logs)
 
 ### Recovery from System Reset
 ```bash
@@ -138,6 +146,52 @@ After starting the services:
 ```bash
 docker-compose down
 ```
+
+## Production Considerations
+
+⚠️ **Important Security Notes for Production Use:**
+
+This template is designed for **development and demonstration purposes**. For production use, consider the following:
+
+### Security
+1. **Vault Dev Mode**: The Vault server runs in `-dev` mode with insecure settings:
+   - No TLS/SSL (HTTP only)
+   - Pre-generated root token (`root`) 
+   - In-memory storage (data lost on container restart)
+2. **Hardcoded Secrets**: Default credentials are hardcoded in startup.sh
+3. **Root Token Exposure**: The root token is passed as environment variable
+
+### Production Recommendations
+1. **Use Production Vault**: Deploy a production Vault cluster with:
+   - TLS/SSL encryption
+   - Proper authentication (AppRole, Kubernetes auth, etc.)
+   - Persistent storage backend
+   - HA configuration
+2. **Secure Secret Management**:
+   - Rotate root token regularly
+   - Use namespaced policies
+   - Enable audit logging
+3. **Network Security**:
+   - Isolate Vault on internal network
+   - Use mutual TLS (mTLS) for service communication
+   - Restrict access with firewall rules
+4. **Datadog Agent**:
+   - Use dedicated service account
+   - Limit secret backend permissions
+   - Monitor secret backend usage
+
+### Template Limitations
+- No high availability
+- No backup/restore mechanism  
+- No monitoring/alerting for Vault health
+- No secret rotation automation
+
+### Getting Production-Ready
+1. Replace Vault dev server with production configuration
+2. Update `VAULT_TOKEN` to use limited-privilege token
+3. Enable TLS in Vault and update `VAULT_ADDR` to `https://`
+4. Implement proper secret lifecycle management
+5. Add monitoring and alerting for both Vault and Datadog Agent
 
 ## License
 
