@@ -26,6 +26,10 @@ A minimal implementation of Datadog Agent with HashiCorp Vault secret management
    docker-compose up --build -d
    ```
 
+## Podman Support
+
+This template is compatible with Podman Compose. See [PODMAN.md](PODMAN.md) for detailed instructions.
+
 ## Components
 
 - **HashiCorp Vault**: Development server with KV v2 secrets engine
