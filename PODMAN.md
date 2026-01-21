@@ -23,6 +23,8 @@ export PATH=$PATH:~/.local/bin
 4. **Docker socket**: Removed `/var/run/docker.sock` volume mount (not needed for secret backend)
 5. **Startup script**: Updated to connect to `vault` hostname instead of `localhost`
 6. **Pod creation**: Disabled with `--in-pod false` flag
+7. **Version pinning**: Vault pinned to `1.21.2`, Datadog Agent pinned to `7.74.1` for reproducibility
+8. **Robust startup**: Exponential backoff for Vault readiness checks
 
 ## Running with Podman Compose
 
@@ -39,6 +41,30 @@ podman compose --in-pod false logs -f
 # Stop services
 podman compose --in-pod false down
 ```
+
+## Using Helper Scripts (Recommended)
+
+For resilient deployment that survives `podman system reset`, use the helper scripts:
+
+```bash
+# 1. Initialize environment
+./init.sh
+
+# 2. Deploy services (includes health checks)
+./deploy.sh
+
+# 3. Test deployment
+./test-deployment.sh
+
+# 4. Clean up everything
+./clean.sh
+```
+
+### Script Functions
+- `clean.sh`: Complete cleanup of containers, networks, pods, and volumes
+- `init.sh`: Environment validation, port checks, .env setup
+- `deploy.sh`: Automated deployment with progress monitoring
+- `test-deployment.sh`: Comprehensive verification of all components
 
 ## Testing Secret Backend
 
@@ -64,6 +90,8 @@ podman exec datadog-agent agent status
 
 ## Troubleshooting
 
+### Common Issues
+
 **Port 8200 already in use**: Ensure no other vault containers are running:
 ```bash
 podman rm -af
@@ -76,3 +104,26 @@ podman logs vault
 ```
 
 **Permission errors on secret_backend.py**: Ensure script has 500 permissions and is owned by dd-agent user.
+
+**"manifest unknown" when pulling vault:latest**: This occurs when Docker Hub doesn't have a `latest` tag for Vault:
+- The template now uses pinned version `vault:1.21.2`
+- Run `./clean.sh` to remove any partial containers
+- Run `./deploy.sh` to deploy with the pinned version
+
+**Recovery from `podman system reset`**:
+```bash
+# After system reset:
+./clean.sh      # Clean residual state
+./init.sh       # Validate environment
+./deploy.sh     # Deploy fresh instance
+```
+
+**OCI format warnings about HEALTHCHECK**: These are harmless warnings from Podman:
+- Podman's OCI format doesn't support HEALTHCHECK instruction
+- Healthchecks still work via `wget` command in container
+- Ignore warnings like "HEALTHCHECK is not supported for OCI image format"
+
+**Container not found errors**: If you see "no container with name datadog-agent":
+- Run `./clean.sh` to remove all containers
+- Run `./deploy.sh` to recreate everything fresh
+- Check if containers exist: `podman ps -a`

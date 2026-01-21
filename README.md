@@ -4,6 +4,26 @@ A minimal implementation of Datadog Agent with HashiCorp Vault secret management
 
 ## Quick Start
 
+### Using Helper Scripts (Recommended)
+
+1. **Initialize environment:**
+   ```bash
+   ./init.sh
+   # Edit .env file to add your real Datadog API key
+   ```
+
+2. **Deploy services:**
+   ```bash
+   ./deploy.sh
+   ```
+
+3. **Test deployment:**
+   ```bash
+   ./test-deployment.sh
+   ```
+
+### Manual Deployment
+
 1. **Copy environment file:**
    ```bash
    cp .env.example .env
@@ -21,14 +41,42 @@ A minimal implementation of Datadog Agent with HashiCorp Vault secret management
    - Change `url: http://test-server:8080` to your actual service endpoint
    - Update credentials in Vault or modify the `secret/http_check` path as needed
 
-5. **Start services:**
+5. **Start services with Podman Compose:**
    ```bash
-   docker-compose up --build -d
+   podman compose --in-pod false up -d --build
    ```
 
 ## Podman Support
 
 This template is compatible with Podman Compose. See [PODMAN.md](PODMAN.md) for detailed instructions.
+
+## Resilient Deployment
+
+This template is designed to survive `podman system reset` operations. Key resilience features:
+
+### Version Pinning
+- **Vault**: Pinned to version `1.21.2` (stable, confirmed working)
+- **Datadog Agent**: Pinned to version `7.74.1` (current stable)
+
+### Helper Scripts
+- `clean.sh` - Complete cleanup of containers, networks, and pods
+- `init.sh` - Environment validation and setup
+- `deploy.sh` - Automated deployment with health checks
+- `test-deployment.sh` - Comprehensive deployment verification
+
+### Recovery from System Reset
+```bash
+# After podman system reset:
+./clean.sh      # Clean any residual state
+./init.sh       # Validate environment
+./deploy.sh     # Deploy fresh instance
+./test-deployment.sh  # Verify functionality
+```
+
+### Robust Startup
+- Exponential backoff for Vault readiness (up to 30 attempts)
+- Graceful handling of existing secrets
+- Detailed logging for troubleshooting
 
 ## Components
 
@@ -45,10 +93,19 @@ The system automatically initializes these secrets in Vault:
 
 ## Configuration Files
 
+### Core Configuration
 - `datadog.yaml`: Main Datadog Agent configuration
 - `conf.d/http_check.yaml`: HTTP check with Vault-secured credentials
+
+### Scripts
 - `scripts/secret_backend.py`: Vault integration script
-- `scripts/startup.sh`: Service initialization script
+- `scripts/startup.sh`: Service initialization script (with exponential backoff)
+
+### Helper Scripts
+- `clean.sh`: Complete cleanup of containers, networks, and pods
+- `init.sh`: Environment validation and initialization
+- `deploy.sh`: Automated deployment with health checks
+- `test-deployment.sh`: Comprehensive deployment verification
 
 ## Usage
 
