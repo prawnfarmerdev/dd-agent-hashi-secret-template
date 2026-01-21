@@ -45,6 +45,22 @@ if ! command -v podman-compose >/dev/null 2>&1; then
     exit 1
 fi
 
+# Check OCI runtime availability
+echo "Checking OCI runtime..."
+if command -v crun >/dev/null 2>&1; then
+    echo "✅ crun OCI runtime found"
+elif command -v runc >/dev/null 2>&1; then
+    echo "✅ runc OCI runtime found"
+    echo "⚠️  Note: Using runc instead of crun (crun is preferred)"
+else
+    echo "❌ No OCI runtime found (crun or runc)"
+    echo "   Install with:"
+    echo "   - Arch: sudo pacman -S crun"
+    echo "   - Ubuntu/Debian: sudo apt install crun"
+    echo "   - Fedora/RHEL: sudo dnf install crun"
+    exit 1
+fi
+
 # Check podman socket
 echo "Checking podman socket..."
 if [ -S "/run/podman/podman.sock" ]; then

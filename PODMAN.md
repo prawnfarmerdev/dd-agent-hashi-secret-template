@@ -62,9 +62,10 @@ For resilient deployment that survives `podman system reset`, use the helper scr
 
 ### Script Functions
 - `clean.sh`: Complete cleanup of containers, networks, pods, and volumes
-- `init.sh`: Environment validation, port checks, .env setup
+- `init.sh`: Environment validation, port checks, .env setup, OCI runtime checks
 - `deploy.sh`: Automated deployment with progress monitoring
 - `test-deployment.sh`: Comprehensive verification of all components
+- `diagnose-podman.sh`: Diagnostic tool for Podman configuration issues
 
 ## Testing Secret Backend
 
@@ -122,6 +123,36 @@ podman logs vault
 - Podman's OCI format doesn't support HEALTHCHECK instruction
 - Healthchecks still work via `wget` command in container
 - Ignore warnings like "HEALTHCHECK is not supported for OCI image format"
+
+**OCI runtime "crun" not found**: If you see "default OCI runtime 'crun' not found invalid argument":
+- Install crun runtime:
+  ```bash
+  # Arch Linux
+  sudo pacman -S crun
+  
+  # Ubuntu/Debian
+  sudo apt install crun
+  
+  # Fedora/RHEL
+  sudo dnf install crun
+  ```
+- Or configure Podman to use runc instead:
+  1. Create `/etc/containers/containers.conf` with:
+  ```
+  [engine]
+  runtime = "runc"
+  ```
+  2. Install runc if not present: `sudo pacman -S runc` or `sudo apt install runc`
+- Check runtime with diagnostic script: `./diagnose-podman.sh`
+
+**RunRoot permissions issues**: If you see "Runroot is pointing to path (/run/user/1000/containers) which is now writable":
+- Fix permissions on RunRoot directory:
+  ```bash
+  RUNROOT=$(podman info --format '{{.Store.RunRoot}}')
+  sudo chown -R $(whoami):$(whoami) "$RUNROOT"
+  sudo chmod 755 "$RUNROOT"
+  ```
+- Or reset Podman storage: `podman system reset` (warning: removes all containers/images)
 
 **Container not found errors**: If you see "no container with name datadog-agent":
 - Run `./clean.sh` to remove all containers

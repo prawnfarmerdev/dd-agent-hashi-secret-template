@@ -103,9 +103,10 @@ The system automatically initializes these secrets in Vault:
 
 ### Helper Scripts
 - `clean.sh`: Complete cleanup of containers, networks, and pods
-- `init.sh`: Environment validation and initialization
+- `init.sh`: Environment validation and initialization (includes OCI runtime checks)
 - `deploy.sh`: Automated deployment with health checks
 - `test-deployment.sh`: Comprehensive deployment verification
+- `diagnose-podman.sh`: Diagnostic tool for Podman configuration issues
 
 ## Usage
 
