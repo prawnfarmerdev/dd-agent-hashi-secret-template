@@ -66,6 +66,7 @@ For resilient deployment that survives `podman system reset`, use the helper scr
 - `deploy.sh`: Automated deployment with progress monitoring
 - `test-deployment.sh`: Comprehensive verification of all components
 - `diagnose-podman.sh`: Diagnostic tool for Podman configuration issues
+- `configure-podman-runtime.sh`: Configure Podman to use runc if crun is unavailable
 
 ## Testing Secret Backend
 
