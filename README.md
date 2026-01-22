@@ -53,7 +53,9 @@ DD_API_KEY=your_actual_datadog_api_key_here
 
 Create Vault token file:
 ```bash
+mkdir -p secrets
 echo "root" > secrets/auth_token  # For development only
+chmod 666 secrets/auth_token  # Allow container to write to the file
 ```
 
 ### 3. Deploy Services
@@ -96,7 +98,14 @@ The Agent requires `/etc/datadog-agent/auth_token` file for security:
 ```yaml
 # In docker-compose.yml
 volumes:
-  - ./secrets/auth_token:/etc/datadog-agent/auth_token:ro
+  - ./secrets/auth_token:/etc/datadog-agent/auth_token
+```
+
+**Important**: The Agent needs write access to this file for security artifact validation. Ensure the file exists and has proper permissions:
+```bash
+mkdir -p secrets
+echo "root" > secrets/auth_token  # Use your actual Vault token in production
+chmod 666 secrets/auth_token  # Allow container to write to the file
 ```
 
 ### Secret References

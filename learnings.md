@@ -29,7 +29,7 @@ secret_backend_config:
 - Agent requires `/etc/datadog-agent/auth_token` file (security artifact check)
 - File can be empty or contain the token value
 - Must exist even when using literal token in YAML (`vault_token: root`)
-- Mount in docker-compose: `- ./secrets/auth_token:/etc/datadog-agent/auth_token:ro`
+- Mount in docker-compose: `- ./secrets/auth_token:/etc/datadog-agent/auth_token` (writable, not read-only)
 
 ### 4. **KV v2 Compatibility**
 - Native integration works with **KV v2** (not just KV v1)
@@ -62,7 +62,7 @@ secret_backend_config:
 **`docker-compose.yml` additions:**
 ```yaml
 volumes:
-  - ./secrets/auth_token:/etc/datadog-agent/auth_token:ro
+  - ./secrets/auth_token:/etc/datadog-agent/auth_token
 ```
 
 **Token file:**
@@ -119,6 +119,7 @@ docker-compose exec datadog-agent agent secret
 | `no auth method or token provided` | Invalid auth configuration | Use `vault_token` at root level (not in `vault_session`) |
 | `Error making API request` | KV version mismatch or network issue | Use KV v2, check Vault logs |
 | `unable to read artifact: /etc/datadog-agent/auth_token` | Missing token file | Create empty file at required path |
+| `unable to move temp artifact to final location /etc/datadog-agent/auth_token: file exist` | Read-only mount or file permissions | Mount file as writable (`chmod 666 secrets/auth_token`) |
 | `unsupported backend type` | Testing `secret-generic-connector` directly | Use Agent config, not direct connector |
 
 ### 6. **Check Vault Logs**

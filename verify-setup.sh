@@ -24,6 +24,18 @@ for file in "${required_files[@]}"; do
     fi
 done
 
+# Check auth_token file permissions
+if [ -f "secrets/auth_token" ]; then
+    echo "🔒 Checking auth_token file permissions..."
+    perms=$(stat -c "%a" "secrets/auth_token" 2>/dev/null || stat -f "%p" "secrets/auth_token" | sed 's/.*\(...\)/\1/')
+    if [[ "$perms" == *"66"* ]] || [[ "$perms" == *"77"* ]]; then
+        echo "  ✅ auth_token has proper permissions ($perms)"
+    else
+        echo "  ⚠️  auth_token may have restrictive permissions ($perms)"
+        echo "     Consider running: chmod 666 secrets/auth_token"
+    fi
+fi
+
 # Check if .env exists
 if [ ! -f ".env" ]; then
     echo "⚠️  .env file not found, copying from .env.example"

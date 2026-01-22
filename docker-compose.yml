@@ -37,7 +37,7 @@ services:
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
       - ./secrets:/etc/datadog-agent/secrets:ro
-      - ./secrets/auth_token:/etc/datadog-agent/auth_token:ro
+      - ./secrets/auth_token:/etc/datadog-agent/auth_token
     depends_on:
       vault:
         condition: service_healthy
