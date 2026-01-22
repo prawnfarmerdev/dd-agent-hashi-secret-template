@@ -39,6 +39,13 @@ wheels/
 .DS_Store
 Thumbs.db
 
+# Package/build artifacts
+*.pkg.tar.*
+*.pkg.tar
+*.tar.*
+*.tar
+.pkg.tar.zst
+
 # Test scripts and debug files
 tests/debug-scripts/
 
