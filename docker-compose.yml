@@ -30,12 +30,14 @@ services:
       - VAULT_DD_API_KEY=${VAULT_DD_API_KEY:-<REPLACE_WITH_REAL_DATADOG_API_KEY>}
       - VAULT_ADDR=http://vault:8200
       - VAULT_TOKEN=root
-      - DD_SITE=datadoghq.com
+      - DD_SITE=us5.datadoghq.com
     env_file:
       - .env
     volumes:
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - ./secrets:/etc/datadog-agent/secrets:ro
+      - ./secrets/auth_token:/etc/datadog-agent/auth_token:ro
     depends_on:
       vault:
         condition: service_healthy

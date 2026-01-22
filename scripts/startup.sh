@@ -78,7 +78,7 @@ if [ -n "${VAULT_DD_API_KEY}" ]; then
     if retry_command 5 1 5 curl -s -f -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
        -d "{\"data\":{\"api_key\":\"${VAULT_DD_API_KEY}\"}}" \
        http://vault:8200/v1/secret/data/datadog; then
-        echo "✅ Datadog API key written to secret/datadog#api_key"
+        echo "✅ Datadog API key written to /secret/datadog;api_key (native Vault integration)"
     else
         echo "⚠️  Datadog API key may already exist or write failed"
     fi
@@ -88,10 +88,10 @@ fi
 
 # Write HTTP check credentials with retry
 echo "Writing HTTP check credentials to Vault..."
-if retry_command 5 1 5 curl -s -f -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
+    if retry_command 5 1 5 curl -s -f -X POST -H "X-Vault-Token: ${VAULT_TOKEN}" \
    -d '{"data":{"username":"testuser","password":"testpass"}}' \
    http://vault:8200/v1/secret/data/http_check; then
-    echo "✅ HTTP check credentials written to secret/http_check"
+    echo "✅ HTTP check credentials written to /secret/http_check (native Vault integration)"
 else
     echo "⚠️  HTTP check credentials may already exist or write failed"
 fi

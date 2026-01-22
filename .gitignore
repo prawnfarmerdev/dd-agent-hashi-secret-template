@@ -38,3 +38,22 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db
+
+# Test scripts and debug files
+tests/debug-scripts/
+
+# Secret files (keep directory with .gitkeep)
+secrets/*
+!secrets/.gitkeep
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Vault data
+local-vault/

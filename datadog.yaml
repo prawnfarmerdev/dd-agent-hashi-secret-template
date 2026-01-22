@@ -1,17 +1,20 @@
-# Datadog API key retrieved from Vault using secret backend
-api_key: ENC[secret/datadog#api_key]
+# Datadog API key retrieved from Vault using native integration
+api_key: ENC[/secret/datadog;api_key]
 
 # Update to your Datadog site (datadoghq.com, us5.datadoghq.com, datadoghq.eu, etc.)
 site: us5.datadoghq.com
 
 hostname: dd-agent-hashi-secret
 
-secret_backend_command: /scripts/secret_backend.py
-secret_backend_timeout: 5
-secret_backend_output_max_size: 1024
+# Native HashiCorp Vault integration (Datadog Agent v7.32.0+)
+# Working configuration with token authentication
+secret_backend_type: hashicorp.vault
+secret_backend_config:
+  vault_address: http://vault:8200
+  vault_token: root  # Literal token value (also requires /etc/datadog-agent/auth_token file)
 
 # Logging
-log_level: INFO
+log_level: DEBUG
 
 # Enable checks
 process_agent_enabled: true
