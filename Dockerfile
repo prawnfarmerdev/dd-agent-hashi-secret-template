@@ -13,7 +13,7 @@ RUN chmod +x /scripts/startup.sh
 
 # Copy configuration
 COPY datadog.yaml /etc/datadog-agent/
-COPY conf.d/ /etc/datadog-agent/conf.d/
+COPY conf.d/ /etc/datadog-agent/conf.d/http_check.d
 
 # Environment variables for Vault (will be set at runtime)
 ENV VAULT_ADDR=http://vault:8200
