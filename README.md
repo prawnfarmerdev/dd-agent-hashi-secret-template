@@ -1,10 +1,10 @@
 # Datadog Agent with Native HashiCorp Vault Secret Management
 
-A **minimal, production-ready template** demonstrating native HashiCorp Vault integration with Datadog Agent. This template uses Datadog Agent's built-in secret backend for secure credential management.
+A minimal, production-ready template demonstrating native HashiCorp Vault integration with Datadog Agent. This template uses Datadog Agent's built-in secret backend for secure credential management.
 
 > **Key Discovery**: Native Vault integration **does support token authentication** (contrary to documentation that only shows AWS IAM).
 
-## 🚀 Features
+## Features
 
 - **Native Secret Management**: Uses Datadog Agent's built-in `secret_backend_type: hashicorp.vault`
 - **Token Authentication**: Works with Vault token authentication (not just AWS IAM)
@@ -13,13 +13,13 @@ A **minimal, production-ready template** demonstrating native HashiCorp Vault in
 - **Containerized**: Docker Compose with version-pinned components
 - **Production-Ready**: Follows Datadog's official secret management patterns
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Docker 20.10+ and Docker Compose
 - Datadog API key (for production use)
 - User in `docker` group or `sudo` access
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 +-------------------+     +-------------------+     +-------------------+
@@ -31,7 +31,7 @@ A **minimal, production-ready template** demonstrating native HashiCorp Vault in
 +-------------------+     +-------------------+     +-------------------+
 ```
 
-## 🛠️ Quick Start
+## Quick Start
 
 ### 1. Clone and Setup
 
@@ -77,7 +77,7 @@ curl http://localhost:8200/v1/sys/health
 docker-compose logs -f datadog-agent
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Native Vault Integration (`datadog.yaml`)
 
@@ -127,7 +127,7 @@ secret/
         └── password: "testpass"
 ```
 
-## 📊 Verification
+## Verification
 
 ```bash
 # Check Agent status with native Vault integration
@@ -143,28 +143,28 @@ docker exec datadog-agent agent secret-helper /secret/datadog;api_key
 docker-compose logs datadog-agent | grep -i vault
 ```
 
-## 🚨 Production Considerations
+## Production Considerations
 
 ### Security
-⚠️ **This template uses Vault in development mode (`-dev`) with insecure settings:**
+**This template uses Vault in development mode (`-dev`) with insecure settings:**
 - No TLS/SSL (HTTP only)
 - Pre-generated root token (`root`)
 - In-memory storage (data lost on container restart)
 
 ### Production Recommendations
-1. **Use Production Vault**: Deploy a production Vault cluster with TLS, persistent storage, and proper authentication
-2. **Rotate Tokens**: Replace root token with limited-privilege token
-3. **Enable TLS**: Update `vault_address` to `https://` and configure certificates
-4. **Network Security**: Isolate Vault on internal network
-5. **Monitoring**: Add health checks and alerting for both Vault and Datadog Agent
+1. Use Production Vault: Deploy a production Vault cluster with TLS, persistent storage, and proper authentication
+2. Rotate Tokens: Replace root token with limited-privilege token
+3. Enable TLS: Update `vault_address` to `https://` and configure certificates
+4. Network Security: Isolate Vault on internal network
+5. Monitoring: Add health checks and alerting for both Vault and Datadog Agent
 
 ### Authentication Methods
 The template uses token authentication. For production, consider:
-- **AWS IAM**: `vault_auth_type: aws` with instance profiles
-- **Kubernetes**: `vault_auth_type: kubernetes` with service accounts
-- **AppRole**: Standard machine-to-machine authentication
+- AWS IAM: `vault_auth_type: aws` with instance profiles
+- Kubernetes: `vault_auth_type: kubernetes` with service accounts
+- AppRole: Standard machine-to-machine authentication
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .
@@ -187,7 +187,7 @@ The template uses token authentication. For production, consider:
 └── LICENSE                  # MIT License
 ```
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -235,7 +235,7 @@ docker exec datadog-agent agent status
 docker exec datadog-agent agent configcheck
 ```
 
-## 📈 Monitoring
+## Monitoring
 
 The Datadog Agent automatically monitors:
 - System metrics (CPU, memory, disk, network)
@@ -245,7 +245,7 @@ The Datadog Agent automatically monitors:
 
 Add additional checks by creating files in `conf.d/` directory.
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -253,11 +253,11 @@ Add additional checks by creating files in `conf.d/` directory.
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🔗 References
+## References
 
 - [Datadog Secret Management Documentation](https://docs.datadoghq.com/agent/configuration/secrets-management/)
 - [HashiCorp Vault Documentation](https://www.vaultproject.io/docs)
